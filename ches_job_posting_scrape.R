@@ -49,28 +49,38 @@ if(nrow(mn) > 0) {
     posted <- mn %>% 
       pull(date_posted)
     
-    test_email <- gm_mime(
-      To = "leximeowskowski@gmail.com",
-      From = "koderkow@gmail.com",
-      Subject = "CHES: New Job Posting!",
-      body = glue(
-        "Hi Lexi :) <3,
-      
-      A new job posting has been found on the CHES website! Check it:
-      
-      Title: {title}
-      Location: {location}
-      Posted: {posted}
-      
-      https://www.nchec.org/job-postings
-      
-      Love you,
-      
-      Kow"
-      )
+    body <- paste0(
+      "Hi Lexi :) <3, <br>
+        <br>
+        A new job posting has been found on the CHES website! Check it: <br>
+        <ul>
+          <li><b>Title:</b> ", title, "</li>
+          <li><b>Location:</b> ", location, "</li>
+          <li><b>Posted:</b> ", posted, "</li>
+        </ul>
+      <a href='https://www.nchec.org/job-postings'>Click here</a> to check out the website! <br>
+      <br>
+        Love you,<br>
+      <br>
+        Kow"
     )
     
-    send_message(test_email)
+    test_email <- gm_mime(
+      To = c(
+        Sys.getenv("GMAILR_MY_EMAIL"),
+        Sys.getenv("GMAILR_L_EMAIL")
+        ),
+      From = Sys.getenv("GMAILR_MY_EMAIL"),
+      Subject = "CHES: New Job Posting!") %>% 
+      gm_html_body(body)
+      
+      gm_auth_configure(
+        key = Sys.getenv("GMAILR_KK_KEY"),
+        secret = Sys.getenv("GMAILR_KK_SECRET"),
+        appname = "gmailr-proj"
+      )
+    
+    gm_send_message(test_email)
     
     mn <- mn %>% 
       mutate(date_found = now()) %>% 
